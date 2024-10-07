@@ -1,5 +1,5 @@
 ##################################################
-### editor setup
+### Editor setup
 
 
 PROMPT='%n@%m:%~ %# '
@@ -8,10 +8,11 @@ export HISTFILE=$HOME/.zsh_history
 export HISTSIZE=10000
 export SAVEHIST=10000
 export EDITOR=vim
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
 
 
 ##################################################
-### plugin
+### Plugin
 
 
 source ~/.zplug/init.zsh
@@ -23,7 +24,7 @@ zplug "zsh-users/zsh-autosuggestions"
 
 
 ##################################################
-### alias
+### Alias
 
 alias "dup"="docker-compose up -d $1"
 alias "dexe"="docker-compose exec $1 $2"
@@ -32,7 +33,7 @@ alias "ddown"="docker-compose down"
 
 
 ##################################################
-### key bind
+### Key bind
 
 
 typeset -g -A key
@@ -63,9 +64,21 @@ key[Shift-Tab]="${terminfo[kcbt]}"
 [[ -n "${key[PageDown]}"  ]] && bindkey -- "${key[PageDown]}"   end-of-buffer-or-history
 [[ -n "${key[Shift-Tab]}" ]] && bindkey -- "${key[Shift-Tab]}"  reverse-menu-complete
 
+##################################################
+### zle
+if (( ${+terminfo[smkx]} && ${+terminfo[rmkx]} )); then
+	autoload -Uz add-zle-hook-widget
+	function zle_application_mode_start { echoti smkx }
+	function zle_application_mode_stop { echoti rmkx }
+	add-zle-hook-widget -Uz zle-line-init zle_application_mode_start
+	add-zle-hook-widget -Uz zle-line-finish zle_application_mode_stop
+fi
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+
 
 ##################################################
-### option
+### Option
 
 
 ## 色を使う
@@ -89,7 +102,7 @@ setopt extended_history
 ## 同じコマンドをhistoryに追加しない
 setopt hist_ignore_all_dups
 
-# スペースで始まるコマンド行はhistoryから削除
+## スペースで始まるコマンド行はhistoryから削除
 setopt hist_ignore_space
 
 ## histroyを呼び出してから実行する間に一旦編集
@@ -116,7 +129,7 @@ zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 ## ディレクトリ名だけで ディレクトリ移動
 setopt auto_cd
 
-# source plugin
+## source plugin
 if ! zplug check --verbose; then
     printf "Install? [y/N]: "
     if read -q; then
